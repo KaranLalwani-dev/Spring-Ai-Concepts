@@ -1,3 +1,16 @@
 spring:
   application:
     name: learn-spring-ai
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: qwen3:4b
+    openai:
+      api-key: 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
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.9
+
