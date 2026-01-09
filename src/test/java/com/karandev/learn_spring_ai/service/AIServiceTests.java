@@ -37,4 +37,10 @@ public class AIServiceTests {
            System.out.println(response);
        }
     }
+
+    @Test
+    public void testAskAI(String prompt) {
+        String response = aiService.askAI("What is apple");
+        System.out.println(response);
+    }
 }
