@@ -10,6 +10,7 @@ public class AIServiceTests {
     @Autowired
     private AIService aiService;
 
+
     @Test
     public void getJoke() {
         var joke = aiService.getJoke("Dogs");
@@ -25,10 +26,6 @@ public class AIServiceTests {
         }
     }
 
-    @Test
-    public void testStoreData() {
-        aiService.ingestDataToVectorStore("This is a big text.");
-    }
 
     @Test
     public void testSimilaritySearch() {
@@ -36,11 +33,5 @@ public class AIServiceTests {
        for(var doc : response) {
            System.out.println(response);
        }
-    }
-
-    @Test
-    public void testAskAI(String prompt) {
-        String response = aiService.askAI("What is apple");
-        System.out.println(response);
     }
 }
