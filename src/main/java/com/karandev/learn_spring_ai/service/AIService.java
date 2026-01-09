@@ -7,6 +7,7 @@ import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,11 @@ public class AIService {
     }
 
     public List<Document> similaritySearch(String text) {
-        return vectorStore.similaritySearch(text);
+        return vectorStore.similaritySearch(SearchRequest.builder()
+                        .query(text)
+                        .topK(3)
+                        .similarityThreshold(0.3)
+                .build());
     }
 
     public void ingestDataToVectorStore(String text) {

@@ -32,7 +32,9 @@ public class AIServiceTests {
 
     @Test
     public void testSimilaritySearch() {
-       var resposne = aiService.similaritySearch("space movie");
-        System.out.println(resposne);
+       var response = aiService.similaritySearch("A team fo people travel through black hole.");
+       for(var doc : response) {
+           System.out.println(response);
+       }
     }
 }
