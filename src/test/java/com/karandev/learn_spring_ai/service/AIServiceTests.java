@@ -24,4 +24,9 @@ public class AIServiceTests {
             System.out.print(e + " ");
         }
     }
+
+    @Test
+    public void testStoreData() {
+        aiService.ingestDataToVectorStore("This is a big text.");
+    }
 }
