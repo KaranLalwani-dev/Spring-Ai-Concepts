@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -132,15 +133,30 @@ public class AIService {
                         Context:
                         {context}
                         
-                        User Question:
-                        {question}
-                        
                         Final Answer:
                         """;
 
+        List<Document> documents = vectorStore.similaritySearch(SearchRequest.builder()
+                .query(prompt)
+                .topK(2)
+                .similarityThreshold(0.5)
+                .filterExpression("topic == 'ai' or topic == 'vectorstore' ")
+                .build());
 
+        String context = documents.stream()
+                .map(Document::getText)
+                .collect(Collectors.joining("\n\n"));
+
+        PromptTemplate promptTemplate = new PromptTemplate(template);
+        String systemPrompt = promptTemplate.render(Map.of("context", context));
+
+        // Using advisors we can augment our prompt better.
         return chatClient.prompt()
+                .system(systemPrompt)
                 .user(prompt)
+                .advisors(
+                        new SimpleLoggerAdvisor()
+                )
                 .call()
                 .content();
     }
