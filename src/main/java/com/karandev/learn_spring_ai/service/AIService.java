@@ -25,9 +25,54 @@ public class AIService {
         return embeddingModel.embed(text);
     }
 
+    public List<Document> similaritySearch(String text) {
+        return vectorStore.similaritySearch(text);
+    }
+
     public void ingestDataToVectorStore(String text) {
-        Document document = new Document(text);
-        vectorStore.add(List.of(document));
+        List<Document> movieDocuments = List.of(
+
+                new Document(
+                        "A skilled thief enters people's dreams to plant an idea for corporate espionage.",
+                        Map.of(
+                                "movieId", "MOV_001",
+                                "title", "Inception",
+                                "year", 2010,
+                                "director", "Christopher Nolan",
+                                "genres", List.of("Sci-Fi", "Thriller"),
+                                "language", "English",
+                                "rating", 8.8
+                        )
+                ),
+
+                new Document(
+                        "Astronauts travel through a wormhole to find a new home for humanity as Earth becomes uninhabitable.",
+                        Map.of(
+                                "movieId", "MOV_002",
+                                "title", "Interstellar",
+                                "year", 2014,
+                                "director", "Christopher Nolan",
+                                "genres", List.of("Sci-Fi", "Drama"),
+                                "language", "English",
+                                "rating", 8.6
+                        )
+                ),
+
+                new Document(
+                        "Batman faces a chaotic criminal mastermind who seeks to destroy Gotham’s moral order.",
+                        Map.of(
+                                "movieId", "MOV_003",
+                                "title", "The Dark Knight",
+                                "year", 2008,
+                                "director", "Christopher Nolan",
+                                "genres", List.of("Action", "Crime", "Drama"),
+                                "language", "English",
+                                "rating", 9.0
+                        )
+                )
+        );
+
+        vectorStore.add(movieDocuments);
     }
 
     public String getJoke(String topic) {

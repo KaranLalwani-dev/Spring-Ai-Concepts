@@ -29,4 +29,10 @@ public class AIServiceTests {
     public void testStoreData() {
         aiService.ingestDataToVectorStore("This is a big text.");
     }
+
+    @Test
+    public void testSimilaritySearch() {
+       var resposne = aiService.similaritySearch("space movie");
+        System.out.println(resposne);
+    }
 }
