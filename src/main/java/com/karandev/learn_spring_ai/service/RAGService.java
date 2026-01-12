@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.VectorStoreChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
@@ -48,6 +49,15 @@ public class RAGService {
                         VectorStoreChatMemoryAdvisor.builder(vectorStore) // vector store will store the chat history and the knowledge base in the same table only.
                                 .conversationId(userId) // but since we have the userId with the conversation id hence we can differentiate between the chat history of multiple users and the knowledge base.
                                 .defaultTopK(4)// With this type of advisor we will have a long term memory because teh conversations are getting stored in the postgres vector db hence if a user asks something about what he talked 10 days ago we will be able to answer that.
+                                .build(),
+
+                        // With this is the model will answer based only on the pdf that is provided and if it cannot find the relevant information then it
+                        // will just say that it does not know the answer.
+                        QuestionAnswerAdvisor.builder(vectorStore)
+                                .searchRequest(SearchRequest.builder()
+                                        .filterExpression("file_name == lec8.pdf")
+                                        .topK(4)
+                                        .build())
                                 .build()
                 )
                 .call()
