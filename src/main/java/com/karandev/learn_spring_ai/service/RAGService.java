@@ -2,8 +2,11 @@ package com.karandev.learn_spring_ai.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.VectorStoreChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
@@ -24,6 +27,7 @@ public class RAGService {
 
     private final ChatClient chatClient;
     private final VectorStore vectorStore;
+    private final ChatMemory chatMemory;
 
     @Value("classpath:lec8.pdf")
     Resource pdfFile;
@@ -35,10 +39,15 @@ public class RAGService {
                         Answer in a friendly and conversational tone.
                         """)
                 .user(prompt)
-                .advisors(// With this type of advisor we will have a long term memory because teh conversations are getting stored in the postgres vector db hence if a user asks something about what he talked 10 days ago we will be able to answer that.
+                .advisors( // we have both short term memory and long term memory.
+
+                        MessageChatMemoryAdvisor.builder(chatMemory) // first this short term memory advisor will work, so this basically considers the last 10 or 20 messages of teh chat and not too long hence the name short term.
+                                .conversationId(userId)// after passing through this short term advisor we will have an enhanced prompt which will be passed on to the long term memory advisor
+                                .build(),
+
                         VectorStoreChatMemoryAdvisor.builder(vectorStore) // vector store will store the chat history and the knowledge base in the same table only.
                                 .conversationId(userId) // but since we have the userId with the conversation id hence we can differentiate between the chat history of multiple users and the knowledge base.
-                                .defaultTopK(4)
+                                .defaultTopK(4)// With this type of advisor we will have a long term memory because teh conversations are getting stored in the postgres vector db hence if a user asks something about what he talked 10 days ago we will be able to answer that.
                                 .build()
                 )
                 .call()
