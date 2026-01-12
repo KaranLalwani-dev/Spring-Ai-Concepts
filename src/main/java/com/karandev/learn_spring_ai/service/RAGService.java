@@ -1,8 +1,10 @@
 package com.karandev.learn_spring_ai.service;
 
+import com.karandev.learn_spring_ai.advisors.TokenUsageAdvisor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.VectorStoreChatMemoryAdvisor;
@@ -42,6 +44,8 @@ public class RAGService {
                 .user(prompt)
                 .advisors( // we have both short term memory and long term memory.
 
+                        new SafeGuardAdvisor(List.of("Politics", "Gaming")),
+
                         MessageChatMemoryAdvisor.builder(chatMemory) // first this short term memory advisor will work, so this basically considers the last 10 or 20 messages of teh chat and not too long hence the name short term.
                                 .conversationId(userId)// after passing through this short term advisor we will have an enhanced prompt which will be passed on to the long term memory advisor
                                 .build(),
@@ -58,7 +62,9 @@ public class RAGService {
                                         .filterExpression("file_name == lec8.pdf")
                                         .topK(4)
                                         .build())
-                                .build()
+                                .build(),
+
+                        new TokenUsageAdvisor()
                 )
                 .call()
                 .content();
