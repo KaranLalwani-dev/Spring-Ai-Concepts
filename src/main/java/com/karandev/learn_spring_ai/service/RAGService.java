@@ -3,6 +3,7 @@ package com.karandev.learn_spring_ai.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.VectorStoreChatMemoryAdvisor;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
@@ -26,6 +27,23 @@ public class RAGService {
 
     @Value("classpath:lec8.pdf")
     Resource pdfFile;
+
+    public String askAIWithAdvisors(String prompt, String userId) {
+        return chatClient.prompt()
+                .system("""
+                        You are an AI assistant Cody greet users with your name (Cody) and the user name if your know their name.
+                        Answer in a friendly and conversational tone.
+                        """)
+                .user(prompt)
+                .advisors(// With this type of advisor we will have a long term memory because teh conversations are getting stored in the postgres vector db hence if a user asks something about what he talked 10 days ago we will be able to answer that.
+                        VectorStoreChatMemoryAdvisor.builder(vectorStore) // vector store will store the chat history and the knowledge base in the same table only.
+                                .conversationId(userId) // but since we have the userId with the conversation id hence we can differentiate between the chat history of multiple users and the knowledge base.
+                                .defaultTopK(4)
+                                .build()
+                )
+                .call()
+                .content();
+    }
 
     public String askAI(String prompt) {
 
@@ -55,7 +73,7 @@ public class RAGService {
                 .query(prompt)
                 .topK(2)
                 .similarityThreshold(0.5)
-                .filterExpression("topic == 'ai' or topic == 'vectorstore' ")
+                .filterExpression("file_name == 'lec8'")
                 .build());
 
         String context = documents.stream()
@@ -69,9 +87,6 @@ public class RAGService {
         return chatClient.prompt()
                 .system(systemPrompt)
                 .user(prompt)
-                .advisors(
-                        new SimpleLoggerAdvisor()
-                )
                 .call()
                 .content();
     }
